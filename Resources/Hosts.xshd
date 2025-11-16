@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SyntaxDefinition name="hosts" extensions=".hosts" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+  <Color name="Comment" foreground="#6A9955" />
+  <Color name="Ip" foreground="#4FC1FF" />
+  <Color name="Hostname" foreground="#CE9178" />
+  <Color name="Whitespace" foreground="#808080" />
+
+  <RuleSet ignoreCase="true">
+    <!-- Comments starting with # -->
+    <Span color="Comment" begin="#" end="\n" />
+
+    <!-- IP address at start of line -->
+    <Rule color="Ip">^[ \t]*((?:\d{1,3}\.){3}\d{1,3}|[0-9a-fA-F:]{2,})</Rule>
+
+    <!-- Hostnames after IP: words separated by whitespace, stop at comment -->
+    <Rule color="Hostname">(?&lt;=\s)((?:[a-zA-Z0-9_-]+\.)*[a-zA-Z0-9_-]+)(?=\s|#|$)</Rule>
+  </RuleSet>
+</SyntaxDefinition>
+
