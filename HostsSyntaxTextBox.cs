@@ -10,7 +10,7 @@ using ICSharpCode.AvalonEdit.Editing;
 
 namespace HostsTool;
 
-public class HostsSyntaxTextBox : System.Windows.Controls.UserControl
+public partial class HostsSyntaxTextBox : System.Windows.Controls.UserControl
 {
     private readonly TextEditor _editor;
     private bool _isUpdating;
@@ -103,7 +103,7 @@ public class HostsSyntaxTextBox : System.Windows.Controls.UserControl
     }
 
     // Simple colorizer: IP (steel blue), hostnames (dark green-ish), comments (gray)
-    private class HostsColorizer : DocumentColorizingTransformer
+    private partial class HostsColorizer : DocumentColorizingTransformer
     {
         private static readonly Regex HostLineRegex = new Regex(@"^\s*(?<ip>(?:\d{1,3}\.){3}\d{1,3}|(?:[0-9a-fA-F]{0,4}:){2,7}[0-9a-fA-F]{0,4})(?<rest>.*)$", RegexOptions.Compiled);
 
@@ -174,31 +174,32 @@ public class HostsSyntaxTextBox : System.Windows.Controls.UserControl
         private void ColorizeHostNames(int absoluteStart, string text)
         {
             // Split by whitespace and color tokens that look like hostnames
-            var parts = Regex.Split(text, "(\\s+)");
+            var parts = BlankRegex().Split(text);
             int offset = 0;
             foreach (var part in parts)
             {
-                if (string.IsNullOrEmpty(part))
+                if (string.IsNullOrEmpty(part) || FullLineBlankRegex().IsMatch(part))
                 {
                     offset += part.Length;
                     continue;
                 }
 
-                if (Regex.IsMatch(part, "^\\s+$"))
+                if (HostnameRegex().IsMatch(part))
                 {
-                    offset += part.Length;
-                    continue;
-                }
-
-                if (Regex.IsMatch(part, "^(?:[a-zA-Z0-9_-]+\\.)*[a-zA-Z0-9_-]+$"))
-                {
-                    int s = absoluteStart + offset;
-                    int e = s + part.Length;
+                    var s = absoluteStart + offset;
+                    var e = s + part.Length;
                     ChangeLinePart(s, e, r => r.TextRunProperties.SetForegroundBrush(new SolidColorBrush(System.Windows.Media.Color.FromRgb(0xCE, 0x91, 0x78))));
                 }
 
                 offset += part.Length;
             }
         }
+
+        [GeneratedRegex("(\\s+)")]
+        private static partial Regex BlankRegex();
+        [GeneratedRegex("^\\s+$")]
+        private static partial Regex FullLineBlankRegex();
+        [GeneratedRegex("^(?:[a-zA-Z0-9_-]+\\.)*[a-zA-Z0-9_-]+$")]
+        private static partial Regex HostnameRegex();
     }
 }
